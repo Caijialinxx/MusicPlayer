@@ -1,5 +1,5 @@
 {
-  "name": "MusicPlayer",
+  "name": "music-player",
   "version": "1.0.0",
   "description": "",
   "main": "SongForm.js",
@@ -10,6 +10,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "leancloud-storage": "^3.10.0"
+    "leancloud-storage": "^3.10.0",
+    "plupload": "^2.3.2",
+    "qiniu": "^7.1.2",
+    "qiniu-js": "^1.0.22"
   }
 }
