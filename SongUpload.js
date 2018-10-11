@@ -56,7 +56,10 @@
               this.view.el.html(this.view.templet)
               let songName = JSON.parse(info.response).key,
                 sourceLink = 'http://' + uploader.settings.domain + '/' + encodeURIComponent(songName)
-              console.log(sourceLink)
+              window.eventhub.publish('newSongUploaded', {
+                url: sourceLink,
+                name: songName
+              })
             },
             'Error': (uploader, err, errTip) => {
               console.error(err)

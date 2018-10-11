@@ -21,18 +21,30 @@
         </div>
       </form>
     `,
-    render() {
-      this.el.html(this.templet)
+    render(data) {
+      let placeholders = ['name', 'singer', 'url'], newHtml = this.templet
+      placeholders.map((item) => {
+        newHtml = newHtml.replace(`__${item}__`, data[item] || '')
+      })
+      this.el.html(newHtml)
     },
   },
-    model = {},
+    model = {
+      data: { id: '', name: '', singer: '', url: '' },
+    },
     controller = {
       view: null,
       model: null,
       init(view, model) {
         this.view = view
         this.model = model
-        this.view.render()
+        this.view.render(this.model.data)
+        this.bindEvents()
+      },
+      bindEvents() {
+        window.eventhub.subscribe('newSongUploaded', (data) => {
+          this.view.render(data)
+        })
       }
     }
   controller.init(view, model)
