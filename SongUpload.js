@@ -17,6 +17,52 @@
         this.view = view
         this.model = model
         this.view.render()
+        this.initQiniu()
+      },
+      initQiniu() {
+        Qiniu.uploader({
+          runtimes: 'html5',
+          browse_button: 'uploader',
+          uptoken_url: 'http://localhost:8080/uptoken',
+          domain: 'pf6pnq6ld.bkt.clouddn.com',
+          get_new_uptoken: false,
+          max_file_size: '20mb',
+          dragdrop: true,
+          drop_element: 'uploader',
+          auto_start: true,
+          init: {
+            // 'FilesAdded': (uploader, files) => {
+            //   plupload.each(files, function (file) {
+            //     // 文件添加进队列后,处理相关的事情
+            //   })
+            // },
+            'BeforeUpload': (uploader, file) => {
+              if (file.type.indexOf('audio') === -1) {
+                alert('请选择音频文件！')
+                uploader.destroy()
+                // uploader.stop()
+              }
+              if (file.size > uploader.settings.max_file_size * 1024 * 1024) {
+                alert('文件不能超过20MB！')
+                uploader.destroy()
+                // uploader.stop()
+              }
+            },
+            'UploadProgress': (uploader, file) => {
+              this.view.el.html(`上传中... ${file.percent}%`)
+            },
+            // 文件上传成功之后调用 FileUploaded
+            'FileUploaded': (uploader, file, info) => {
+              this.view.el.html(this.view.templet)
+              let songName = JSON.parse(info.response).key,
+                sourceLink = 'http://' + uploader.settings.domain + '/' + encodeURIComponent(songName)
+              console.log(sourceLink)
+            },
+            'Error': (uploader, err, errTip) => {
+              console.error(err)
+            },
+          }
+        })
       }
     }
   controller.init(view, model)
