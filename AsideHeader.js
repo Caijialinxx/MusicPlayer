@@ -18,6 +18,18 @@
       init(view) {
         this.view = view
         this.view.render()
+        this.bindEvents()
+      },
+      bindEvents() {
+        window.eventhub.subscribe('editSong', () => {
+          this.view.deactive()
+        })
+        window.eventhub.subscribe('newSong', () => {
+          this.view.active()
+        })
+        this.view.el.on('click', () => {
+          window.eventhub.publish('newSong')
+        })
       }
     }
   controller.init(view)

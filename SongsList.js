@@ -33,6 +33,18 @@
         window.eventhub.subscribe('songEditSaved', () => {
           this.updateView()
         })
+        window.eventhub.subscribe('newSong', () => {
+          this.view.el.children().removeClass('active')
+        })
+        window.eventhub.subscribe('editSong', (e)=>{
+          $(e.target).addClass('active').siblings().removeClass('active')
+        })
+        this.view.el.on('click', 'li', (e) => {
+          window.eventhub.publish('editSong', {
+            target: e.target,
+            data: this.model.datas.filter(item => item.id === e.target.dataset.songid)[0]
+          })
+        })
       },
       updateView() {
         this.model.fetch().then(() => {

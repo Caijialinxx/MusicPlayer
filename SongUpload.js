@@ -17,7 +17,16 @@
         this.view = view
         this.model = model
         this.view.render()
+        this.bindEvents()
         this.initQiniu()
+      },
+      bindEvents() {
+        window.eventhub.subscribe('newSongUploaded', () => {
+          this.view.render()
+        })
+        this.view.el.on('click', () => {
+          window.eventhub.publish('newSong')
+        })
       },
       initQiniu() {
         Qiniu.uploader({
@@ -53,7 +62,6 @@
             },
             // 文件上传成功之后调用 FileUploaded
             'FileUploaded': (uploader, file, info) => {
-              this.view.el.html(this.view.templet)
               let songName = JSON.parse(info.response).key,
                 sourceLink = 'http://' + uploader.settings.domain + '/' + encodeURIComponent(songName)
               window.eventhub.publish('newSongUploaded', {

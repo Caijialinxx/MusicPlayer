@@ -65,6 +65,14 @@
           this.model.add(data)
           this.view.render({})
         })
+        window.eventhub.subscribe('newSong', () => {
+          this.view.render({})
+          this.view.el.find('h2').html('新建歌曲')
+        })
+        window.eventhub.subscribe('editSong', (e) => {
+          this.view.render(e.data)
+          this.view.el.find('h2').html('编辑歌曲')
+        })
         this.view.el.on('submit', 'form', (e) => {
           e.preventDefault()
           let formData = {}
