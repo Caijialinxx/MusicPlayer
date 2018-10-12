@@ -39,11 +39,10 @@
           songFolder.set(item, data[item])
         })
         songFolder.save().then((song) => {
-          this.data = {
-            id: song.id,
-            ...song.attributes
-          }
-          console.log(this.data)
+          // this.data = {
+          //   id: song.id,
+          //   ...song.attributes
+          // }
         }, (error) => {
           console.error(error)
         })
@@ -62,13 +61,17 @@
         window.eventhub.subscribe('newSongUploaded', (data) => {
           this.view.render(data)
         })
+        window.eventhub.subscribe('songEditSaved', (data) => {
+          this.model.add(data)
+          this.view.render({})
+        })
         this.view.el.on('submit', 'form', (e) => {
           e.preventDefault()
           let formData = {}
           $(e.target).find('input[type="text"]').map((index, item) => {
             formData[item.name] = item.value
           })
-          this.model.add(formData)
+          window.eventhub.publish('songEditSaved', formData)
         })
       }
     }
