@@ -31,6 +31,23 @@
   },
     model = {
       data: { id: '', name: '', singer: '', url: '' },
+      add(data) {
+        let SongFolder = AV.Object.extend('Songs')
+        let songFolder = new SongFolder()
+        let keys = ['name', 'singer', 'url']
+        keys.map((item) => {
+          songFolder.set(item, data[item])
+        })
+        songFolder.save().then((song) => {
+          this.data = {
+            id: song.id,
+            ...song.attributes
+          }
+          console.log(this.data)
+        }, (error) => {
+          console.error(error)
+        })
+      },
     },
     controller = {
       view: null,
@@ -44,6 +61,14 @@
       bindEvents() {
         window.eventhub.subscribe('newSongUploaded', (data) => {
           this.view.render(data)
+        })
+        this.view.el.on('submit', 'form', (e) => {
+          e.preventDefault()
+          let formData = {}
+          $(e.target).find('input[type="text"]').map((index, item) => {
+            formData[item.name] = item.value
+          })
+          this.model.add(formData)
         })
       }
     }
