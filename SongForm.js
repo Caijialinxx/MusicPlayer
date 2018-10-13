@@ -2,7 +2,7 @@
   let view = {
     el: $('#editor'),
     templet: `
-      <h2>新建歌曲</h2>
+      <h2>编辑歌曲</h2>
       <form>
         <div class="row">
           <label for="">歌曲：</label>
@@ -32,21 +32,22 @@
     model = {
       data: { id: '', name: '', singer: '', url: '' },
       add(data) {
-        let SongFolder = AV.Object.extend('Songs')
-        let songFolder = new SongFolder()
+        let Songs = AV.Object.extend('Songs')
+        let song = new Songs()
         let keys = ['name', 'singer', 'url']
         keys.map((item) => {
-          songFolder.set(item, data[item])
+          song.set(item, data[item])
         })
-        songFolder.save().then((song) => {
-          // this.data = {
-          //   id: song.id,
-          //   ...song.attributes
-          // }
-        }, (error) => {
-          console.error(error)
-        })
+        song.save()
       },
+      update(data) {
+        let song = AV.Object.createWithoutData('Songs', data.id)
+        let keys = ['name', 'singer', 'url']
+        keys.map((item) => {
+          song.set(item, data[item])
+        })
+        song.save()
+      }
     },
     controller = {
       view: null,
@@ -55,6 +56,7 @@
         this.view = view
         this.model = model
         this.view.render(this.model.data)
+        this.view.el.find('h2').html('新建歌曲')
         this.bindEvents()
       },
       bindEvents() {
@@ -62,20 +64,24 @@
           this.view.render(data)
         })
         window.eventhub.subscribe('songEditSaved', (data) => {
-          this.model.add(data)
-          this.view.render({})
+          if (data.id) {
+            this.model.update(data)
+          } else {
+            this.model.add(data)
+          }
         })
         window.eventhub.subscribe('newSong', () => {
-          this.view.render({})
+          this.model.data = {}
+          this.view.render(this.model.data)
           this.view.el.find('h2').html('新建歌曲')
         })
         window.eventhub.subscribe('editSong', (e) => {
-          this.view.render(e.data)
-          this.view.el.find('h2').html('编辑歌曲')
+          this.model.data = e.data
+          this.view.render(this.model.data)
         })
         this.view.el.on('submit', 'form', (e) => {
           e.preventDefault()
-          let formData = {}
+          let formData = this.model.data
           $(e.target).find('input[type="text"]').map((index, item) => {
             formData[item.name] = item.value
           })
