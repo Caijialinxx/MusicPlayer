@@ -4,7 +4,7 @@
     render(datas) {
       let songLis = []
       songLis = datas.map(song => {
-        return $(`<li data-songId=${song.id}>${song.name}</li>`)
+        return $(`<li data-songid=${song.id}>${song.name}</li>`)
       })
       this.el.html(songLis)
     },
@@ -26,17 +26,19 @@
       init(view, model) {
         this.view = view
         this.model = model
-        this.updateView()
+        this.model.fetch().then(() => {
+          this.view.render(this.model.datas)
+        })
         this.bindEvents()
       },
       bindEvents() {
-        window.eventhub.subscribe('songEditSaved', () => {
-          this.updateView()
+        window.eventhub.subscribe('songEditSaved', (data) => {
+          this.updateView(data)
         })
         window.eventhub.subscribe('newSong', () => {
           this.view.el.children().removeClass('active')
         })
-        window.eventhub.subscribe('editSong', (e)=>{
+        window.eventhub.subscribe('editSong', (e) => {
           $(e.target).addClass('active').siblings().removeClass('active')
         })
         this.view.el.on('click', 'li', (e) => {
@@ -46,10 +48,17 @@
           })
         })
       },
-      updateView() {
-        this.model.fetch().then(() => {
-          this.view.render(this.model.datas)
-        })
+      updateView(data) {
+        let $target = this.view.el.find(`[data-songid=${data.id}]`)
+        if ($target.length) {
+          // 已存在，此为更新
+          $target.html(data.name)
+        } else {
+          // 不存在，新建li
+          $target = $(`<li data-songid=${data.id}>${data.name}</li>`)
+          this.view.el.append($target)
+        }
+        $target.addClass('active').siblings().removeClass('active')
       }
     }
   controller.init(view, model)
