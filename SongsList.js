@@ -1,10 +1,21 @@
 {
   let view = {
     el: $('#songsList'),
+    templet: `
+      <li data-songid="__id__">
+        <span name="name">__name__</span>
+        <button name="delete">删除</button>
+      </li>
+    `,
     render(datas) {
       let songLis = []
       songLis = datas.map(song => {
-        return $(`<li data-songid=${song.id}>${song.name}</li>`)
+        let keys = ['id', 'name']
+        let li = this.templet
+        keys.map(item => {
+          li = li.replace(`__${item}__`, song[item])
+        })
+        return li
       })
       this.el.html(songLis)
     },
@@ -18,6 +29,10 @@
             return { id: song.id, ...song.attributes }
           })
         })
+      },
+      delete(id) {
+        let song = AV.Object.createWithoutData('Songs', id);
+        return song.destroy()
       },
     },
     controller = {
@@ -42,10 +57,21 @@
           $(e.target).addClass('active').siblings().removeClass('active')
         })
         this.view.el.on('click', 'li', (e) => {
-          window.eventhub.publish('editSong', {
-            target: e.target,
-            data: this.model.datas.filter(item => item.id === e.target.dataset.songid)[0]
-          })
+          if (e.target.name === 'delete') {
+            let result = confirm(`确定删除？`)
+            if (result) {
+              this.model.delete(e.currentTarget.dataset.songid)
+                .then(() => {
+                  $(e.currentTarget).remove()
+                  window.eventhub.publish('newSong')
+                })
+            }
+          } else {
+            window.eventhub.publish('editSong', {
+              target: e.currentTarget,
+              data: this.model.datas.filter(item => item.id === e.currentTarget.dataset.songid)[0]
+            })
+          }
         })
       },
       updateView(data) {

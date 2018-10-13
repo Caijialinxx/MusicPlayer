@@ -28,8 +28,18 @@ aside.songs-wrapper li {
   height: 50px;
   padding: 0 12px;
   display: flex;
+  justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid #00000010;
+}
+aside.songs-wrapper li button {
+  border: none;
+  background: none;
+  color: #bbb;
+  cursor: pointer;
+}
+aside.songs-wrapper li button:hover {
+  color: #000;
 }
 aside.songs-wrapper .active {
   background-color: #fcfcfc;
